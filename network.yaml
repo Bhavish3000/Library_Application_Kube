@@ -1,0 +1,38 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: booksdb-network-policy
+  labels:
+    network: books
+spec:
+  podSelector:
+    matchLabels:
+      db: books
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              service: books
+
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: books-network-policy
+  labels:
+    network: books
+spec:
+  podSelector:
+    matchLabels:
+      service: books
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: library

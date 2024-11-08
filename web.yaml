@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kubernetes.io/change-cause: "version v1.0"
+  name: web-service
+  labels:
+    web: library
+spec:
+  minReadySeconds: 10
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  selector:
+    matchLabels:
+      web: library
+  template:
+    metadata:
+      name: web-service-pod
+      labels:
+        web: library
+    spec:
+      automountServiceAccountToken: false
+      containers:
+        - name: web-service-container
+          envFrom:
+            - configMapRef:
+                name: web-service-config
+          image: shaikkhajaibrahim/libwebstore:1.0
+          resources:
+            requests:
+               memory: 24M
+               cpu: 100m
+            limits:
+               memory: 128M
+               cpu: 500m
+          ports:
+            - containerPort: 3000
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: libservice
+spec:
+  selector:
+     web: library
+  type:  LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
